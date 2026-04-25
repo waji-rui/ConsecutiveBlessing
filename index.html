@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>2026 新年祈福连击</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Ma+Shan+Zheng&family=Noto+Serif+SC:wght@400;700&display=swap');
+        :root { --primary: #FFD700; --accent: #FF4500; --bg-dark: #1a0505; --glass: rgba(255, 255, 255, 0.05); --glass-border: rgba(255, 215, 0, 0.3); }
+        * { box-sizing: border-box; }
+        body {
+            margin: 0; background-color: var(--bg-dark);
+            background-image: radial-gradient(circle at 50% 50%, #2c0404 0%, #000000 100%);
+            color: var(--primary); font-family: "Noto Serif SC", serif;
+            overflow: hidden; display:flex; flex-direction:column; align-items:center; justify-content:center;
+            height:100vh; text-align:center; user-select:none; -webkit-tap-highlight-color: transparent;
+        }
+        #bg-canvas, #fireworks { position: absolute; top:0; left:0; width:100%; height:100%; pointer-events:none; z-index:1; }
+        #fireworks { z-index:20; }
+        #app { z-index:10; width:100%; height:100%; display:flex; flex-direction:column; justify-content:center; align-items:center; position:relative; }
+        .glass-panel {
+            background: var(--glass); backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+            border: 1px solid var(--glass-border); border-radius:20px; padding:40px; box-shadow:0 8px 32px rgba(0,0,0,0.37);
+            width:90%; max-width:350px; transform: translateY(20px); opacity:0; transition: all 0.5s ease;
+        }
+        @media (max-width:360px) { .glass-panel { padding:25px 15px; } }
+        .fade-in-up { animation: fadeInUp 0.8s forwards ease-out; }
+        @keyframes fadeInUp { to { opacity:1; transform: translateY(0); } }
+        h2 { margin-bottom:20px; font-weight:normal; letter-spacing:2px; }
+        .btn-start {
+            width:100%; padding:12px 0; font-size:1.1rem; background:linear-gradient(45deg,#d4af37,#f9d423);
+            color:#2c0404; border:none; border-radius:50px; cursor:pointer; font-weight:bold; box-shadow:0 4px 15px rgba(212,175,55,0.4);
+            transition: transform 0.2s;
+        }
+        .btn-start:active { transform: scale(0.95); }
+        #main-view { width:100%; height:100%; position:relative; display:none; }
+        .text-container { position:absolute; top:40%; left:50%; transform:translate(-50%,-50%); width:90%; pointer-events:none; transition:all 0.5s ease; }
+        #text-display { font-family:'Ma Shan Zheng', cursive; font-size:2.2rem; line-height:1.4; color:#fff; text-shadow:0 0 10px rgba(255,215,0,0.6); min-height:120px; transition:opacity 0.3s; }
+        #count-display { font-family:'Courier New', monospace; margin-top:10px; color:rgba(255,255,255,0.6); font-size:1rem; }
+        #game-btn {
+            position: fixed; width:120px; height:120px; border-radius:50%; background: radial-gradient(circle at 30% 30%, #ff6b6b, #8b0000);
+            border:2px solid #ffd700; box-shadow:0 0 20px rgba(255,69,0,0.6); color:#fff; font-weight:bold; font-size:1rem;
+            cursor:pointer; z-index:100; display:flex; align-items:center; justify-content:center; text-align:center; padding:10px;
+            transition: transform 0.1s ease-out; -webkit-user-select:none; touch-action: manipulation;
+        }
+        #game-btn::after {
+            content:''; position:absolute; top:-10px; left:-10px; right:-10px; bottom:-10px; border-radius:50%;
+            border:1px solid rgba(255,215,0,0.3); animation:pulse 2s infinite;
+        }
+        @keyframes pulse { 0% { transform:scale(1); opacity:0.5 } 100% { transform:scale(1.3); opacity:0 } }
+        .finished-state { display:flex !important; flex-direction:column; align-items:center; justify-content:center; }
+        .finished-state .text-container { position:relative; top:auto; left:auto; transform:none; margin-bottom:40px; }
+        .finished-state #game-btn { position:relative !important; left:auto !important; top:auto !important; width:auto; height:auto; border-radius:50px; padding:15px 50px; background:#d4af37; color:#000; box-shadow:0 0 30px #d4af37; transform:none !important; }
+        .finished-state #text-display { font-size:4.5rem; color:#FFD700; animation:textGlow 1.5s infinite alternate; }
+        @keyframes textGlow { from { text-shadow:0 0 10px #FFD700 } to { text-shadow:0 0 40px #FFD700, 0 0 80px #FF0000 } }
+        footer { position:fixed; bottom:15px; font-size:0.75rem; color:rgba(255,255,255,0.3); width:100%; z-index:5; }
+    </style>
+</head>
+<body>
+    <canvas id="bg-canvas"></canvas>
+    <canvas id="fireworks"></canvas>
+
+    <div id="app">
+        <!-- 登录视图已改为直接开始（去掉专属号码输入） -->
+        <div id="login-view" class="glass-panel fade-in-up">
+            <h2 style="color:var(--primary);">🧧 2026 迎新祈福</h2>
+            <div style="font-size:0.9rem; color:#ccc; margin-bottom:20px;">谨供纪念</div>
+            <button class="btn-start" onclick="startJourney()">开启祈福之旅</button>
+        </div>
+
+        <div id="main-view">
+            <div class="text-container">
+                <h1 id="text-display">点击按钮以继续</h1>
+                <p id="count-display"></p>
+            </div>
+            <button id="game-btn" onmousedown="handleBtnClick(event)" ontouchstart="handleBtnClick(event)">
+                开启我的<br>新年祝福
+            </button>
+        </div>
+    </div>
+
+    <footer>©创意工作室 | Power by Cloudflare Workers & Gemini & ChatGPT</footer>
+
+    <script>
+        // ---------- 祝福语数组 ----------
+        // ！！！请将下面示例数组替换为完整的祝福语列表（原BLESSINGS数组）！！！
+        // 当前仅保留示例便于测试，您可直接覆盖下方 const BLESSINGS = [ ... ] 全部内容
+        const BLESSINGS = [
+            "千门万户曈曈日，总把新桃换旧符。",
+            "愿新年，胜旧年，多喜乐，长安宁。",
+            "2026，我敢想，我能行，我必赢！",
+            "且将新火试新茶，诗酒趁年华。",
+            "凛冬散尽，星河长明。",
+            "愿你眼里有光，心中有爱，目光所及皆是星辰大海。",
+            "行而不辍，未来可期。",
+            "所求皆如愿，所行化坦途。"
+        ];  // 后续请替换为完整版数组（2026+条祝福）
+
+        let currentCount = 0;
+        const TARGET_COUNT = 2026;
+        const COOKIE_NAME = 'blessingCount';
+
+        // ---------- Cookie 工具 ----------
+        function setCookie(name, value, days) {
+            const d = new Date();
+            d.setTime(d.getTime() + (days||365)*24*60*60*1000);
+            document.cookie = name + "=" + encodeURIComponent(value) + ";path=/;expires=" + d.toUTCString();
+        }
+        function getCookie(name) {
+            const v = document.cookie.match('(^|;)\\s*' + name + '\\s*=\\s*([^;]+)');
+            return v ? decodeURIComponent(v.pop()) : null;
+        }
+        function deleteCookie(name) {
+            document.cookie = name + "=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/";
+        }
+
+        // ---------- 启动流程 ----------
+        function startJourney() {
+            const loginView = document.getElementById('login-view');
+            loginView.style.transform = "scale(0.8)";
+            loginView.style.opacity = "0";
+            setTimeout(() => {
+                loginView.style.display = 'none';
+                document.getElementById('main-view').style.display = 'block';
+                // 从 cookie 读取当前计数
+                const saved = parseInt(getCookie(COOKIE_NAME) || '0', 10);
+                currentCount = isNaN(saved) ? 0 : saved;
+                updateProgressText();
+                if (currentCount >= TARGET_COUNT) {
+                    showFinishState();
+                } else {
+                    resetButtonPosition();
+                }
+            }, 400);
+        }
+
+        // ---------- 点击逻辑（全部本地，不再发送请求） ----------
+        function handleBtnClick(e) {
+            if (e.type === 'touchstart') e.preventDefault();
+            if (currentCount >= TARGET_COUNT) return;
+
+            moveButtonRandomly();
+
+            currentCount++;
+            setCookie(COOKIE_NAME, currentCount, 365);
+            updateProgressText();
+
+            // 如果刚好完成，直接进入完成态，不再显示随机文案
+            if (currentCount >= TARGET_COUNT) {
+                showFinishState();
+                return;
+            }
+
+            const textDisplay = document.getElementById('text-display');
+            textDisplay.style.opacity = 0;
+            setTimeout(() => {
+                textDisplay.innerText = BLESSINGS[Math.floor(Math.random() * BLESSINGS.length)];
+                textDisplay.style.opacity = 1;
+            }, 120);
+        }
+
+        function updateProgressText() {
+            document.getElementById('count-display').innerText = `福气值: ${currentCount} / ${TARGET_COUNT}`;
+        }
+
+        // ---------- 按钮位置控制 ----------
+        function resetButtonPosition() {
+            const btn = document.getElementById('game-btn');
+            btn.style.left = 'calc(50% - 60px)';
+            btn.style.top = '60%';
+        }
+
+        function moveButtonRandomly() {
+            const btn = document.getElementById('game-btn');
+            const txt = document.querySelector('.text-container').getBoundingClientRect();
+            const btnSize = 120;
+            const padding = 20;
+            const maxX = window.innerWidth - btnSize - padding;
+            const maxY = window.innerHeight - btnSize - padding;
+            let x, y;
+            let safe = false;
+            let attempts = 0;
+            while (!safe && attempts < 50) {
+                x = padding + Math.random() * (maxX - padding);
+                y = padding + Math.random() * (maxY - padding);
+                const btnLeft = x, btnRight = x + btnSize, btnTop = y, btnBottom = y + btnSize;
+                if (btnRight < txt.left - 20 || btnLeft > txt.right + 20 || btnBottom < txt.top - 20 || btnTop > txt.bottom + 20) {
+                    safe = true;
+                }
+                attempts++;
+            }
+            btn.style.left = x + 'px';
+            btn.style.top = y + 'px';
+            btn.style.transform = `rotate(${Math.random()*20 - 10}deg)`;
+        }
+
+        // ---------- 完成状态与重置 ----------
+        function showFinishState() {
+            const btn = document.getElementById('game-btn');
+            const display = document.getElementById('text-display');
+            const mainView = document.getElementById('main-view');
+
+            mainView.classList.add('finished-state');
+
+            btn.style.left = '';
+            btn.style.top = '';
+            btn.style.transform = '';
+
+            display.innerText = "新年快乐";
+            document.getElementById('count-display').innerText = "2026 祈福圆满";
+
+            btn.innerHTML = "清零再来";
+            btn.disabled = false;
+            btn.onmousedown = resetJourney;
+            btn.ontouchstart = function(e){ e.preventDefault(); resetJourney(); };
+            startFireworks();
+        }
+
+        function resetJourney() {
+            deleteCookie(COOKIE_NAME);
+            location.reload();
+        }
+
+        // ---------- 背景粒子效果 ----------
+        (function initBackground() {
+            const canvas = document.getElementById('bg-canvas');
+            const ctx = canvas.getContext('2d');
+            let width, height; let particles = [];
+            function resize() { width = canvas.width = window.innerWidth; height = canvas.height = window.innerHeight; }
+            window.addEventListener('resize', resize);
+            resize();
+            class Particle { constructor(){ this.reset(); } reset(){ this.x = Math.random()*width; this.y = Math.random()*height; this.size = Math.random()*2; this.speedX = Math.random()*0.5 - 0.25; this.speedY = Math.random()*0.5 - 0.25; this.alpha = Math.random()*0.5; this.growing = Math.random()>0.5; } update(){ this.x += this.speedX; this.y += this.speedY; if (this.x<0||this.x>width||this.y<0||this.y>height) this.reset(); if(this.growing){ this.alpha += 0.005; if(this.alpha>0.8) this.growing=false; } else { this.alpha -= 0.005; if(this.alpha<0.1) this.growing=true; } } draw(){ ctx.fillStyle = `rgba(255,215,0,${this.alpha})`; ctx.beginPath(); ctx.arc(this.x,this.y,this.size,0,Math.PI*2); ctx.fill(); } }
+            for(let i=0;i<50;i++) particles.push(new Particle());
+            function animate(){ ctx.clearRect(0,0,width,height); particles.forEach(p=>{p.update(); p.draw();}); requestAnimationFrame(animate); }
+            animate();
+        })();
+
+        // ---------- 烟花效果 ----------
+        function startFireworks() {
+            const canvas = document.getElementById('fireworks');
+            const ctx = canvas.getContext('2d');
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
+            let fireworks = [];
+            class Firework {
+                constructor() {
+                    this.x = Math.random()*canvas.width;
+                    this.y = canvas.height;
+                    this.targetY = canvas.height*0.2 + Math.random()*canvas.height*0.5;
+                    this.speed = 5 + Math.random()*5;
+                    this.angle = -Math.PI/2 + (Math.random()*0.2 - 0.1);
+                    this.vx = Math.cos(this.angle) * this.speed;
+                    this.vy = Math.sin(this.angle) * this.speed;
+                    this.hue = Math.random()*360; this.particles = []; this.exploded = false;
+                }
+                update() {
+                    if(!this.exploded) { this.x += this.vx; this.y += this.vy; this.vy += 0.05; if(this.vy >= 0 || this.y <= this.targetY) this.explode(); }
+                    else {
+                        for(let i=this.particles.length-1;i>=0;i--){ this.particles[i].update(); if(this.particles[i].alpha<=0) this.particles.splice(i,1); }
+                    }
+                }
+                explode(){ this.exploded = true; for(let i=0;i<50;i++) this.particles.push(new Spark(this.x,this.y,this.hue)); }
+                draw(){ if(!this.exploded){ ctx.fillStyle = `hsl(${this.hue},100%,50%)`; ctx.beginPath(); ctx.arc(this.x,this.y,3,0,Math.PI*2); ctx.fill(); } else { this.particles.forEach(p=>p.draw()); } }
+            }
+            class Spark {
+                constructor(x,y,hue){ this.x=x; this.y=y; const angle=Math.random()*Math.PI*2; const speed=Math.random()*4+1; this.vx=Math.cos(angle)*speed; this.vy=Math.sin(angle)*speed; this.gravity=0.1; this.friction=0.95; this.alpha=1; this.hue=hue+Math.random()*20-10; }
+                update(){ this.vx *= this.friction; this.vy *= this.friction; this.vy += this.gravity; this.x += this.vx; this.y += this.vy; this.alpha -= 0.015; }
+                draw(){ ctx.save(); ctx.globalAlpha = this.alpha; ctx.fillStyle = `hsl(${this.hue},100%,60%)`; ctx.beginPath(); ctx.arc(this.x,this.y,2,0,Math.PI*2); ctx.fill(); ctx.restore(); }
+            }
+            function loop() {
+                ctx.globalCompositeOperation = 'destination-out';
+                ctx.fillStyle = 'rgba(0,0,0,0.2)';
+                ctx.fillRect(0,0,canvas.width,canvas.height);
+                ctx.globalCompositeOperation = 'lighter';
+                if (Math.random() < 0.05) fireworks.push(new Firework());
+                for (let i = fireworks.length - 1; i >= 0; i--) {
+                    fireworks[i].update(); fireworks[i].draw();
+                    if (fireworks[i].exploded && fireworks[i].particles.length === 0) fireworks.splice(i, 1);
+                }
+                requestAnimationFrame(loop);
+            }
+            loop();
+        }
+    </script>
+</body>
+</html>
