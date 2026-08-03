@@ -659,6 +659,8 @@ const BLESSINGS = [
           .finished-state #text-display { font-size:4.5rem; color:#FFD700; animation:textGlow 1.5s infinite alternate; }
           @keyframes textGlow { from { text-shadow:0 0 10px #FFD700 } to { text-shadow:0 0 40px #FFD700, 0 0 80px #FF0000 } }
           footer { position:fixed; bottom:15px; font-size:0.75rem; color:rgba(255,255,255,0.3); width:100%; z-index:5; }
+          footer a { color:var(--primary); text-decoration:none; opacity:0.85; transition:opacity 0.2s; }
+          footer a:hover { opacity:1; text-decoration:underline; }
       </style>
   </head>
   <body>
@@ -684,7 +686,7 @@ const BLESSINGS = [
           </div>
       </div>
   
-      <footer>©创意工作室 | Power by Cloudflare Workers & Gemini & ChatGPT | <a href="https://github.com/waji-rui/ConsecutiveBlessing/">Github</a></footer>
+      <footer>© 创意工作室 | 含有AI生成内容 | <a href="https://github.com/waji-rui/ConsecutiveBlessing/">GitHub</a></footer>
   
       <script>
           // --------- 前端状态（全部本地） ----------
