@@ -10,15 +10,14 @@
 
 本项目是一个轻量的单页互动网页游戏，适合在春节期间分享给朋友一起“祈福”。玩家每次点击祈福按钮，都会随机展示一条祝福语，并累计 1 点福气值；当福气值达到 2026 时，页面进入圆满状态，触发烟花动画，并显示“新年快乐”。
 
-项目提供了两种使用方式：
+> 项目源于我新634班的2026新年活动，现在改成了本仓库的无需数据库的形式。
+
+项目提供了两种部署方式：
 
 1. **直接部署静态 HTML**：使用 [`index.html`](./index.html) 即可部署到任何静态托管服务（如 GitHub Pages、Vercel、Netlify、Cloudflare Pages）。
 2. **Cloudflare Workers 部署**：使用 [`worker.js`](./worker.js) 作为 Worker 脚本，由服务端动态返回完整页面。
 
-两种版本玩法、样式与逻辑完全一致，区别在于：
-
-- `index.html` 是完整自包含的单文件，内嵌了全部代码与祝福数据。
-- `worker.js` 将祝福数组统一维护在服务端，并通过 `JSON.stringify` 注入到客户端脚本中，避免前后端重复维护数据。
+两种版本玩法、样式与逻辑完全一致，您可自选您喜爱的部署方式。
 
 ---
 
@@ -58,11 +57,14 @@
 
 - 标准的 Cloudflare Workers ES Module 入口，导出 `fetch` 处理器。
 - 服务端维护一份 `BLESSINGS` 数组，并注入到返回的 HTML 中。
-- 适合希望统一维护祝福数据、通过 Worker 直接返回页面的场景。
 
 ---
 
 ## 快速开始
+
+### 项目示例
+
+- 点击 [本链接](https://click2026.creaconception.moe) 查看示例站点
 
 ### 方式一：直接打开
 
@@ -237,9 +239,7 @@ CSS 变量集中在 `:root` 中：
 
 ## 致谢
 
-- 灵感与代码贡献：Gemini、ChatGPT、Deepseek
-- 字体：Google Fonts（Ma Shan Zheng、Noto Serif SC）
-- 托管方案：Cloudflare Workers / GitHub Pages
+感谢所有热烈参与了2026连击活动的新634班同学！
 
 ---
 
