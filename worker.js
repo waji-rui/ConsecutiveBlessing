@@ -658,9 +658,9 @@ const BLESSINGS = [
           .finished-state #game-btn { position:relative !important; left:auto !important; top:auto !important; width:auto; height:auto; border-radius:50px; padding:15px 50px; background:#d4af37; color:#000; box-shadow:0 0 30px #d4af37; transform:none !important; }
           .finished-state #text-display { font-size:4.5rem; color:#FFD700; animation:textGlow 1.5s infinite alternate; }
           @keyframes textGlow { from { text-shadow:0 0 10px #FFD700 } to { text-shadow:0 0 40px #FFD700, 0 0 80px #FF0000 } }
-          footer { position:fixed; bottom:15px; font-size:0.75rem; color:rgba(255,255,255,0.3); width:100%; z-index:5; }
-          footer a { color:var(--primary); text-decoration:none; opacity:0.85; transition:opacity 0.2s; }
-          footer a:hover { opacity:1; text-decoration:underline; }
+          footer { position:fixed; bottom:15px; font-size:0.75rem; color:rgba(255,255,255,0.3); width:100%; z-index:100; pointer-events:none; }
+          footer a { color:rgba(255,215,0,0.55); text-decoration:none; pointer-events:auto; transition:color 0.2s, opacity 0.2s; }
+          footer a:hover { color:rgba(255,215,0,0.9); text-decoration:underline; }
       </style>
   </head>
   <body>
