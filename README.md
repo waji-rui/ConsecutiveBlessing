@@ -233,8 +233,6 @@ CSS 变量集中在 `:root` 中：
 
 本项目基于 [MIT License](./LICENSE) 开源。
 
-版权所有 (c) 2026 瓦吉rui
-
 ---
 
 ## 致谢
